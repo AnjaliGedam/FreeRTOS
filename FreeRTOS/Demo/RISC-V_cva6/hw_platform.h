@@ -13,6 +13,9 @@
 #define MTIMECMP_BASE_ADDRESS   0x4000UL
 #define MTIME_BASE_ADDRESS      0xBFF8UL
 
+/***************************************************************************/
+#define FPGA_UART_0_FREQUENCY 50000000
+#define FPGA_UART_0_BASE 0x10000000
 #define STDIO_BAUD_RATE  UART_115200_BAUD
 
 #endif // HW_PLATFORM_H

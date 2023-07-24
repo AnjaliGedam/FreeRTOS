@@ -128,7 +128,6 @@ int main( void )
 {
 	prvSetupHardware();
     flash_led();
-	int ret;
 	// trap handler initialization
     #if( mainVECTOR_MODE_DIRECT == 1 )
 	{
@@ -151,25 +150,15 @@ int main( void )
 		main_full();
 	}
 	#endif
+    return 0;
 }
 /*-----------------------------------------------------------*/
 
 
 
-/*-----------------------------------------------------------*/
-
-//void vSendString( const char * const pcString )
-//{
-//    //UART_polled_tx_string( &g_uart, ( const uint8_t * ) pcString );
-//}
-/*-----------------------------------------------------------*/
 
 void vApplicationMallocFailedHook( void )
 {
-  uint8_t s_debug[16] = "failed_malloc\r\n";
-      portENTER_CRITICAL();
-      UART_polled_tx_string(gp_my_uart, s_debug);
-      portEXIT_CRITICAL();
 	/* vApplicationMallocFailedHook() will only be called if
 	configUSE_MALLOC_FAILED_HOOK is set to 1 in FreeRTOSConfig.h.  It is a hook
 	function that will get called if a call to pvPortMalloc() fails.
@@ -188,10 +177,6 @@ void vApplicationMallocFailedHook( void )
 
 void vApplicationIdleHook( void )
 {
-  //uint8_t s_debug[16] = "dle_hook\r\n";
-  //    portENTER_CRITICAL();
-  //    UART_polled_tx_string(gp_my_uart, s_debug);
-  //    portEXIT_CRITICAL();
 	/* vApplicationIdleHook() will only be called if configUSE_IDLE_HOOK is set
 	to 1 in FreeRTOSConfig.h.  It will be called on each iteration of the idle
 	task.  It is essential that code added to this hook function never attempts
@@ -206,13 +191,8 @@ void vApplicationIdleHook( void )
 
 void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 {
-  //uint8_t s_debug[16] = "stack_overflow\r\n";
-  //    portENTER_CRITICAL();
-  //    UART_polled_tx_string(gp_my_uart, s_debug);
-  //    portEXIT_CRITICAL();
 	( void ) pcTaskName;
 	( void ) pxTask;
-
 	/* Run time stack overflow checking is performed if
 	configCHECK_FOR_STACK_OVERFLOW is defined to 1 or 2.  This hook
 	function is called if a stack overflow is detected. */
@@ -224,10 +204,6 @@ void vApplicationStackOverflowHook( TaskHandle_t pxTask, char *pcTaskName )
 
 void vApplicationTickHook( void )
 {
-  //uint8_t s_debug[16] = "tick_hook\r\n";
-  //    portENTER_CRITICAL();
-  //    UART_polled_tx_string(gp_my_uart, s_debug);
-  //    portEXIT_CRITICAL();
 	/* The tests in the full demo expect some interaction with interrupts. */
 	#if( mainCREATE_SIMPLE_BLINKY_DEMO_ONLY != 1 )
 	{
@@ -240,13 +216,13 @@ void vApplicationTickHook( void )
 
 void vAssertCalled( void )
 {
-  uint8_t s_debug[16] = "vassert called\r\n";
-      portENTER_CRITICAL();
-      UART_polled_tx_string(gp_my_uart, s_debug);
-      portEXIT_CRITICAL();
-volatile uint32_t ulSetTo1ToExitFunction = 0;
+    uint8_t s_debug[16] = "vassert called\r\n";
+    portENTER_CRITICAL();
+    UART_polled_tx_string(gp_my_uart, s_debug);
+    portEXIT_CRITICAL();
+    volatile uint32_t ulSetTo1ToExitFunction = 0;
 
-	taskDISABLE_INTERRUPTS();
+    taskDISABLE_INTERRUPTS();
 	while( ulSetTo1ToExitFunction != 1 )
 	{
 		__asm volatile( "NOP" );

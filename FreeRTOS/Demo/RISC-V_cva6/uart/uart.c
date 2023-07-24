@@ -19,11 +19,10 @@
 // =========================================================================== //
 
 
-
 #include "uart.h"
 
-#include "plic.h"
-#include "fpga_platform_config.h"
+//#include "plic.h"
+#include "../hw_platform.h"
 
 
 /*******************************************************************************
@@ -210,7 +209,7 @@ UART_polled_tx_string
 )
 {
     uint32_t char_idx = 0u;
-    uint32_t fill_size;
+    //uint32_t fill_size;
     uint8_t data_byte;
     volatile uint8_t status;
 
@@ -390,12 +389,12 @@ UART_set_rx_handler
 {
     //ASSERT(handler != INVALID_IRQ_HANDLER );
     //ASSERT(trigger_level < UART_FIFO_INVALID_TRIG_LEVEL);
-    PLIC_init();
+    //PLIC_init();
     
     if ((handler != INVALID_IRQ_HANDLER) &&
        (trigger_level < UART_FIFO_INVALID_TRIG_LEVEL))
     {
-        printf("UART DEBUG1\n");
+        //printf("UART DEBUG1\n");
         this_uart->rx_handler = handler;
 
         /* Set the receive interrupt trigger level. */
@@ -405,7 +404,7 @@ UART_set_rx_handler
 
         /* Enable receive interrupt. */
         this_uart->hw_reg->IER |= ERBFI_MASK;
-        printf("UART Enable IRQ\n");
+        //printf("UART Enable IRQ\n");
         enable_irq(this_uart);
     }
 }
@@ -526,8 +525,8 @@ UART_get_rx_status
     this_uart->status |= (this_uart->hw_reg->LSR);
     status = (this_uart->status & STATUS_ERROR_MASK);
     
-    printf("UART_get_rx_status = %d", status);
-    printf("UART_get_rx_LSR = %d", this_uart->hw_reg->LSR);
+    //printf("UART_get_rx_status = %d", status);
+    //printf("UART_get_rx_LSR = %d", this_uart->hw_reg->LSR);
 
 
     /* Clear the sticky status after reading */
@@ -559,7 +558,7 @@ UART_get_modem_status
      * Bit 7 - Data Carrier Detect
      */
     status = this_uart->hw_reg->MSR;
-    printf("UART_get_modem_status = %d", status);
+    //printf("UART_get_modem_status = %d", status);
     
     return status;
 }
@@ -683,13 +682,13 @@ config_baud_divisors
  * function in response to transmit interrupts if UART_irq_tx() is used to
  * transmit data.
  */
-static void
+static void __attribute__ ((unused))
 uart_isr
 (
     uart_instance_t * this_uart
 )
 {
-    printf("uart_isr called\n");
+    //printf("uart_isr called\n");
     uint8_t iirf;
 
     iirf = this_uart->hw_reg->IIR & IIRF_MASK;
@@ -804,7 +803,7 @@ default_tx_handler
 }
 
 
-static void
+static void __attribute__ ((unused))
 enable_irq
 (
     const uart_instance_t * this_uart
@@ -812,35 +811,35 @@ enable_irq
 {
 
 
-   PLIC_IRQn_Type plic_num = 0;
+   //PLIC_IRQn_Type plic_num = 0;
 
     if (&g_uart_0 == this_uart )
     {
-        printf("enable_irq() UART assign plic_num = %d\n",plic_num);
-        plic_num = UART_0_PLIC_IRQHandler;
+        //printf("enable_irq() UART assign plic_num = %d\n",plic_num);
+        //plic_num = UART_0_PLIC_IRQHandler;
 
     }
     else
     {
-        printf("ASSERT(0) called\n");
+        //printf("ASSERT(0) called\n");
         //ASSERT(0); /*Alternative case has been considered*/
     }
 
     /* Enable UART instance interrupt in PLIC. */
-    PLIC_EnableIRQ(plic_num);
+    //PLIC_EnableIRQ(plic_num);
 }
 
-static void
+static void __attribute__ ((unused))
 disable_irq
 (
     const uart_instance_t * this_uart
 )
 {
-    PLIC_IRQn_Type plic_num = 0;
+    //PLIC_IRQn_Type plic_num = 0;
 
     if (&g_uart_0 == this_uart )
     {
-        plic_num = UART_0_PLIC_IRQHandler;
+        //plic_num = UART_0_PLIC_IRQHandler;
     }
     else
     {
@@ -848,6 +847,6 @@ disable_irq
     }
 
     /* Disable UART instance interrupt in PLIC. */
-    PLIC_DisableIRQ(plic_num);
+    //PLIC_DisableIRQ(plic_num);
 }
 

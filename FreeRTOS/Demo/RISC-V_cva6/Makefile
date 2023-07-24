@@ -14,15 +14,11 @@ GCCVER 	= $(shell $(GCC) --version | grep gcc | cut -d" " -f9)
 #RISCV ?= ~/riscv_fpga  
 #32-bit
 #RISCV ?= ~/riscv
-CCPATH	= ~/riscv_fpga
+RISCV_CCPATH = ${CCPATH}
 
 BUILD_DIR       = build
 FREERTOS_SOURCE_DIR = $(abspath ../../Source)
 DEMO_SOURCE_DIR = $(abspath ../Common/Minimal)
-
-PROG	= cva6_freertos_app
-
-
 
 INCLUDES = \
 	-I. \
@@ -32,29 +28,6 @@ INCLUDES = \
 	-I./uart \
 	-I../../Source/include 
 #-----------------------------------------------------------
-# qemu
-CPPFLAGS = \
-	-D__riscv_float_abi_soft \
-	-DportasmHANDLE_INTERRUPT=handle_trap \
-	-I . \
-	-I ../Common/include \
-	-I $(FREERTOS_SOURCE_DIR)/include \
-	-I uart/ \
-	-I $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V \
-	-I $(FREERTOS_SOURCE_DIR)/portable/GCC/RISC-V/chip_specific_extensions/RV32I_CLINT_no_extensions
-CFLAGS  = -march=rv32imac -mabi=ilp32 -mcmodel=medany \
-	-Wall \
-	-fmessage-length=0 \
-	-ffunction-sections \
-	-fdata-sections \
-	-fno-builtin-printf
-
-LDFLAGS = -nostartfiles -Tfake_rom.ld \
-	-march=rv32imac -mabi=ilp32 -mcmodel=medany \
-	-Xlinker --gc-sections \
-	-Xlinker --defsym=__stack_size=500 \
-	-Xlinker -Map=RTOSDemo.map # output file
-
 
 # cva6
 CPPFLAGS = 
@@ -76,9 +49,10 @@ LDFLAGS	 = -T link.ld \
 			-static \
 			-fno-builtin-printf \
 			-Xlinker --defsym=__stack_size=300 \
+			-Xlinker -Map=RTOSDemo.map # output file
 
-LIBS	 = -L$(CCPATH)/lib/gcc/$(TARGET)/$(GCCVER) \
-		   -L$(CCPATH)/$(TARGET)/lib \
+LIBS	 = -L$(RISCV_CCPATH)/lib/gcc/$(TARGET)/$(GCCVER) \
+		   -L$(RISCV_CCPATH)/$(TARGET)/lib \
 		   -lc \
 		   -lgcc
 
@@ -90,9 +64,7 @@ else
     CFLAGS += -O2
 endif
 
-
 #-----------------------------------------------------------
-
 
 FREERTOS_SRC = \
 	$(FREERTOS_SOURCE_DIR)/croutine.c \
@@ -127,8 +99,6 @@ DEMO_SRC =  \
 	$(DEMO_SOURCE_DIR)/integer.c \
 	$(DEMO_SOURCE_DIR)/MessageBufferDemo.c 
 
-	
-
 
 ASM_SRC = start.S \
 		  vector.S \
@@ -142,12 +112,7 @@ APP_SRC = \
 	full_demo/RegTests.c \
 	riscv-virt.c \
 	uart/uart.c
-	#syscalls.c 
-	#clib.c \
 	
-
-
-
 
 OBJS = $(FREERTOS_SRC:%.c=$(BUILD_DIR)/%.o) \
 	   $(DEMO_SRC:%.c=$(BUILD_DIR)/%.o) \
@@ -159,7 +124,7 @@ DEPS = $(FREERTOS_SRC:%.c=$(BUILD_DIR)/%.d) \
 		$(ASM_SRC:%.S=$(BUILD_DIR)/%.d) \
 		$(APP_SRC:%.c=$(BUILD_DIR)/%.d)
 
-$(BUILD_DIR)/RTOSDemo.axf: $(OBJS) link.ld Makefile
+$(BUILD_DIR)/RTOSDemo.elf: $(OBJS) link.ld Makefile
 	$(GCC) $(LDFLAGS) $(LIBS) $(OBJS) -o $@
 
 $(BUILD_DIR)/%.o: %.c Makefile
